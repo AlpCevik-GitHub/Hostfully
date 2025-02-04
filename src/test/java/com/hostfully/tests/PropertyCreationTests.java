@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -34,13 +35,14 @@ public class PropertyCreationTests extends TestBase {
      * Unauthorized Access	401 Unauthorized
      */
     @DisplayName("Create Property with Valid Input")
-    @Test
+    @ParameterizedTest
+    @ValueSource(ints = 10)
     @Order(1)
-    public void createPropertyWithValidInput() throws IOException {
+    public void createPropertyWithValidInput(int value ) throws IOException {
 
         // Create parameterized test for creating property with valid input
         HostfullyUtil.clearCSV();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < value; i++) {
             String name = GenerateFakeParameter.generateName();
 
             Property property = new Property();

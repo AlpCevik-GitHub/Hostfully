@@ -6,6 +6,7 @@ import io.cucumber.java.be.I;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -18,6 +19,7 @@ import static io.restassured.RestAssured.given;
 
 public class PropertyRetrievalTests extends TestBase{
 
+    @DisplayName("Test Property Retrieval with Valid ID")
     @ParameterizedTest
     @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
     public void testWithValidID(String id, String name, String date){
@@ -42,7 +44,7 @@ public class PropertyRetrievalTests extends TestBase{
 
     }
 
-
+    @DisplayName("Test Property Retrieval with Invalid ID")
     @ParameterizedTest
     @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
     public void testWithInvalidID(String id){
