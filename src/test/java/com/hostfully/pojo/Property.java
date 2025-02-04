@@ -1,49 +1,32 @@
 package com.hostfully.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.cucumber.java.sl.In;
+import lombok.Setter;
+import lombok.ToString;
+import org.htmlunit.corejs.javascript.annotations.JSGetter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import lombok.Getter;
 
+@Getter
+@Setter
+@ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Property {
+
+    @JsonProperty("id")
     private String id;
+    @JsonProperty("alias")
     private String alias;
+    @JsonProperty("countryCode")
     private String countryCode;
+    @JsonProperty("createdAt")
     private List<Integer> createdAt;
 
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
-    }
-
-    public void setCreatedAt(List<Integer> createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public List<Integer> getCreatedAt() {
-        return createdAt;
-    }
 
 }

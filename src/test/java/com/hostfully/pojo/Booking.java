@@ -1,115 +1,47 @@
 package com.hostfully.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.List;
 
+
+@Setter
+@Getter
+@ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Booking {
 
+    @JsonProperty("id")
     private String id;
+    @JsonProperty("startDate")
     private List<Integer> startDate;
+    @JsonProperty("endDate")
     private List<Integer> endDate;
+    @JsonProperty("status")
     private String status;
+    @JsonProperty("guest")
     private Guest guest;
+    @JsonProperty("propertyId")
     private String propertyId;
 
-    @Override
-    public String toString() {
-        return "Booking{" +
-                "id='" + id + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", status='" + status + '\'' +
-                ", guest=" + (guest != null ? guest.toString() : "null") +
-                ", propertyId='" + propertyId + '\'' +
-                '}';
-    }
-
-    // Getter ve Setter
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public List<Integer> getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(List<Integer> startDate) {
-        this.startDate = startDate;
-    }
-
-    public List<Integer> getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(List<Integer> endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Guest getGuest() {
-        return guest;
-    }
-
-    public void setGuest(Guest guest) {
-        this.guest = guest;
-    }
-
-    public String getPropertyId() {
-        return propertyId;
-    }
-
-    public void setPropertyId(String propertyId) {
-        this.propertyId = propertyId;
-    }
 
     // Nested Guest
+    @Setter
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Guest {
+
+        @JsonProperty("firstName")
         private String firstName;
+        @JsonProperty("lastName")
         private String lastName;
+        @JsonProperty("dateOfBirth")
         private List<Integer> dateOfBirth;
 
-        // Getter ve Setter
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public void setFirstName(String firstName) {
-            this.firstName = firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public void setLastName(String lastName) {
-            this.lastName = lastName;
-        }
-
-        public List<Integer> getDateOfBirth() {
-            return dateOfBirth;
-        }
-
-        public void setDateOfBirth(List<Integer> dateOfBirth) {
-            this.dateOfBirth = dateOfBirth;
-        }
-
-        @Override
-        public String toString() {
-            return "Guest{" +
-                    "firstName='" + firstName + '\'' +
-                    ", lastName='" + lastName + '\'' +
-                    ", dateOfBirth=" + dateOfBirth +
-                    '}';
-        }
     }
 }
