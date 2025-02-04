@@ -2,7 +2,6 @@ package com.hostfully.tests;
 
 import com.hostfully.pojo.Property;
 import com.hostfully.utilities.HostfullyUtil;
-import io.cucumber.java.be.I;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;

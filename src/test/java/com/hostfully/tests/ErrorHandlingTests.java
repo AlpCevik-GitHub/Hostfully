@@ -7,6 +7,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.json.Json;
 
@@ -17,7 +18,7 @@ import static io.restassured.RestAssured.given;
 
 public class ErrorHandlingTests extends TestBase{
 
-
+    @DisplayName("Test Bad Request")
     @Test
     public void testBadRequest() {
         //send a post request with missing parameters
@@ -54,7 +55,7 @@ public class ErrorHandlingTests extends TestBase{
         response.prettyPrint();
 
     }
-
+    @DisplayName("Test Unauthorized Request")
     @Test
     public void testUnauthorizedRequest() {
         //send a get request without token
@@ -75,7 +76,7 @@ public class ErrorHandlingTests extends TestBase{
 
         response.prettyPrint();
     }
-
+    @DisplayName("Test Forbidden Request")
     @Test
     public void testInvalidCredentials() {
         //send a get request with invalid token
@@ -95,7 +96,7 @@ public class ErrorHandlingTests extends TestBase{
         Assertions.assertEquals("Unauthorized",jsonPath.getString("error"));
         jsonPath.prettyPrint();
     }
-
+    @DisplayName("Test Not Found")
     @Test
     public void testNotFound() {
         //send a get request with invalid url
@@ -111,7 +112,7 @@ public class ErrorHandlingTests extends TestBase{
 
         response.prettyPrint();
     }
-
+    @DisplayName("Test Method Not Allowed")
     @Test
     public void testUnsupportedMediaType() {
         //send a post request with invalid body
@@ -133,7 +134,7 @@ public class ErrorHandlingTests extends TestBase{
         response.prettyPrint();
     }
 
-
+    @DisplayName("Test Internal Server Error")
     @Test
     public void testInternalServerError() {
         //send a post request with error in the body
