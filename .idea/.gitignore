@@ -1,43 +1,12 @@
-# Default ignored files
-/shelf/
-/workspace.xml
-# Editor-based HTTP Client requests
-/httpRequests/
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-# GitHub Copilot persisted chat sessions
-/copilot/chatSessions
-# Maven target folder
+# Ignore the target directory (Maven, Gradle, etc.)
 target/
 
-# IDE folders for IntelliJ IDEA and others
+# Ignore IntelliJ IDEA files
 .idea/
 *.iml
 
-# Folders for Eclipse and NetBeans
-.classpath
-.project
-.settings/
+# Ignore log files
+*.log
 
-# Compiled files
+# Ignore compiled Java classes
 *.class
-*.jar
-*.war
-*.ear
-
-# Test reports
-test-classes/
-test-output/
-*.log
-
-# Other unnecessary files
-*.swp
-*.bak
-*.tmp
-*.log
-
-# OS-specific temporary files
-.DS_Store
-Thumbs.db
-/.gitignore
