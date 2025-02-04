@@ -2,10 +2,10 @@ package com.hostfully.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.cucumber.java.sl.In;
+
 import lombok.Setter;
 import lombok.ToString;
-import org.htmlunit.corejs.javascript.annotations.JSGetter;
+
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
