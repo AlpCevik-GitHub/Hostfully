@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -25,9 +26,15 @@ public class Booking {
     private String status;
     @JsonProperty("guest")
     private Guest guest;
-    @JsonProperty("propertyId")
-    private String propertyId;
 
+    private static List<String> propertyId = new ArrayList<>();
+
+    public static void getPropertyId() {
+        Booking.propertyId.forEach(System.out::println);
+    }
+    public static void setPropertyId(String propertyId) {
+        Booking.propertyId.add(propertyId);
+    }
 
     // Nested Guest
     @Setter

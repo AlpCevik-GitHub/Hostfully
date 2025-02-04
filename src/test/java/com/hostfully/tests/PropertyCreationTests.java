@@ -1,21 +1,93 @@
 package com.hostfully.tests;
 
+import com.hostfully.pojo.Booking;
 import com.hostfully.pojo.Property;
+import com.hostfully.utilities.GenerateFakeParameter;
+import com.hostfully.utilities.HostfullyUtil;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import kotlin.collections.ArrayDeque;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 
-public class PropertyCreationTests extends TestBase{
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class PropertyCreationTests extends TestBase {
 
-
+    /**
+     * Valid Input	        201 Created
+     * Missing Fields	    400 Bad Request
+     * Invalid Format	    400 Bad Request
+     * Unauthorized Access	401 Unauthorized
+     */
+    @DisplayName("Create Property with Valid Input")
     @Test
-    public void test(){
+    @Order(1)
+    public void createPropertyWithValidInput() throws IOException {
+
+        // Create parameterized test for creating property with valid input
+        HostfullyUtil.clearCSV();
+        for (int i = 0; i < 10; i++) {
+            String name = GenerateFakeParameter.generateName();
+
+            Property property = new Property();
+            property.setAlias(name);
+
+
+            Response response = given()
+                    .spec(userRequestSpec)
+                    .body(property)
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .post("/properties")
+                    .then()
+                    .statusCode(201)
+                    .extract().response();
+
+            JsonPath jsonPath = response.jsonPath();
+
+            Assertions.assertEquals(201, response.statusCode());
+            Assertions.assertEquals("application/json", response.contentType());
+            Assertions.assertEquals(name, jsonPath.getString("alias"));
+            Assertions.assertNull(jsonPath.getString("countryCode"));
+            Assertions.assertFalse(jsonPath.getString("id").isEmpty());
+
+            response.prettyPrint();
+
+            Property property1 = given()
+                    .spec(userRequestSpec)
+                    .when()
+                    .get("/properties").jsonPath().getObject("find{it.alias == '" + name + "'}", Property.class);
+
+
+            Booking.setPropertyId(String.valueOf(property1.getId()));
+            Booking.getPropertyId();
+            System.out.println("property1.getCreatedAt().toString() = " + property1.getCreatedAt().toString());
+
+            String createdAt = HostfullyUtil.parseDateString(property1.getCreatedAt().toString());
+            HostfullyUtil.appendToCSV(HostfullyUtil.path, String.valueOf(property1.getId()), String.valueOf(property1.getAlias()),createdAt);
+
+
+        }
+    }
+
+    @DisplayName("Create Property with Missing Fields")
+    @Test
+    @Order(5)
+    public void test() {
         Response response = given()
                 .spec(userRequestSpec)
                 .when()
@@ -23,58 +95,18 @@ public class PropertyCreationTests extends TestBase{
 
         System.out.println("response.body().asString() = " + response.body().asString());
     }
-/**  Valid Input	        201 Created
-     Missing Fields	        400 Bad Request
-     Invalid Format	        400 Bad Request
-     Unauthorized Access	401 Unauthorized
- */
-
-    @Test
-    public void createPropertyWithValidInput() {
+    @DisplayName("Create Property with Missing Fields")
+    @ParameterizedTest
+    @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
+    @Order(2)
+    public void createPropertyWithInvalidInput(String id) throws IOException {
 
         Property property = new Property();
-        property.setAlias("Property for Africans");
-        property.setCountryCode(null);
-        property.setCreatedAt(Arrays.asList(2025, 1, 13, 19, 41, 33, 240453000));
-
-
-       Response response = given()
-               .spec(userRequestSpec)
-                .body(property)
-               .contentType(ContentType.JSON)
-               .when()
-               .post("/properties")
-               .then()
-               .statusCode(201)
-               .extract().response();
-
-       JsonPath jsonPath = response.jsonPath();
-
-       Assertions.assertEquals(201, response.statusCode());
-//       Assertions.assertEquals("application/json", response.contentType());
-//       Assertions.assertEquals("48e8f7a2-7cd9-4da6-96e8-9c01b12a9068", jsonPath.getString("id"));
-//       Assertions.assertEquals("Property for American", jsonPath.getString("alias"));
-//       Assertions.assertEquals(Arrays.asList(2025, 1, 21, 19, 41, 33, 240453000), jsonPath.getList("createdAt"));
-
-
-       response.prettyPrint();
-
-    }
-
-    @Test
-    public void createPropertyWithInvalidInput() {
-
-        Property property = new Property();
-        property.setId("844bf8ad-a434-4e9a-9a6e-f6cdc5a719ed");
-        property.setAlias("Property for America");
-        property.setCountryCode(null);
-        property.setCreatedAt(Arrays.asList(2025, 1, 21, 19, 41, 33, 240453000));
-
-
+        property.setId(id);
 
         Response response = given()
                 .spec(userRequestSpec)
-                .body(property)
+                .body(property+",")
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/properties");
@@ -87,16 +119,18 @@ public class PropertyCreationTests extends TestBase{
         response.body().prettyPrint();
 
 
-    }
 
-    @Test
-    public void createPropertyWithBadRequest() {
+
+    }
+    @DisplayName("Create Property with Invalid Format")
+    @ParameterizedTest
+    @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
+    @Order(3)
+    public void checkPropertyWithValidationError(String id) throws IOException {
 
         Property property = new Property();
-        property.setId("844bf8ad-a434-4e9a-9a6e-f6cdc5a719eg");
-        property.setAlias("Property for American");
-        property.setCountryCode(null);
 
+        property.setId(id);
 
 
         Response response = given()
@@ -108,20 +142,21 @@ public class PropertyCreationTests extends TestBase{
 
         JsonPath jsonPath = response.jsonPath();
         Assertions.assertEquals(400, response.statusCode());
-        Assertions.assertEquals("Failed to read request", jsonPath.getString("detail"));
+        Assertions.assertEquals("application/problem+json", response.contentType());
+        Assertions.assertEquals("Validation failed", jsonPath.getString("detail"));
+        Assertions.assertEquals("Validation Error", jsonPath.getString("title"));
         response.body().prettyPrint();
 
 
     }
-
+    @DisplayName("Create Property with Internal Error")
     @Test
-    public void createPropertyWithInternalError() {
+    @Order(3)
+    public void checkPropertyWithInternalError() {
 
         Property property = new Property();
 
         property.setAlias("Property for American");
-
-
 
 
         Response response = given()
@@ -139,15 +174,15 @@ public class PropertyCreationTests extends TestBase{
 
 
     }
-
+    @DisplayName("Create Property with Unauthorized Access")
     @Test
-    public void createPropertyWithUnauthorizedAccess() {
+    @Order(4)
+    public void checkPropertyWithUnauthorizedAccess() {
 
         Property property = new Property();
-        property.setId("844bf8ad-a434-4e9a-9a6e-f6cdc5a719ed");
+
         property.setAlias("Property for America");
         property.setCountryCode(null);
-        property.setCreatedAt(Arrays.asList(2025, 1, 21, 19, 41, 33, 240453000));
 
 
         Response response = given()
@@ -165,6 +200,7 @@ public class PropertyCreationTests extends TestBase{
 
 
     }
+
 
 
 

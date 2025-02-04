@@ -1,30 +1,40 @@
 package com.hostfully.tests;
 
+import com.hostfully.pojo.Property;
+import com.hostfully.utilities.HostfullyUtil;
+import io.cucumber.java.be.I;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
 public class PropertyRetrievalTests extends TestBase{
 
-    @Test
-    public void testWithValidID(){
-
-        String propertyId = "844bf8ad-a434-4e9a-9a6e-f6cdc5a719ed";
+    @ParameterizedTest
+    @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
+    public void testWithValidID(String id, String name, String date){
 
         Response response = given()
                 .spec(userRequestSpec)
-                .pathParam("id", propertyId)
+                .pathParam("id", id)
                 .when()
                 .get("/properties/{id}");
 
-        JsonPath jsonPath = response.jsonPath();
+        Property property = response.as(Property.class);
 
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertEquals(propertyId, jsonPath.getString("id"));
-        Assertions.assertEquals("Property for America", jsonPath.getString("alias"));
+        Assertions.assertEquals(id, property.getId());
+        Assertions.assertEquals(name, property.getAlias());
+        String parseDateString = HostfullyUtil.parseDateString(String.valueOf(property.getCreatedAt()));
+        Assertions.assertEquals(date, parseDateString, "Date comparison failed");
 
         response.prettyPeek();
 
@@ -32,37 +42,16 @@ public class PropertyRetrievalTests extends TestBase{
 
     }
 
-    @Test
-    public void testWithValidID1(){
 
-        String propertyId = "48e8f5a2-7cd9-4da6-96e8-9c01b12a9068";
+    @ParameterizedTest
+    @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
+    public void testWithInvalidID(String id){
 
-        Response response = given()
-                .spec(userRequestSpec)
-                .pathParam("id", propertyId)
-                .when()
-                .get("/properties/{id}");
-
-        JsonPath jsonPath = response.jsonPath();
-
-        Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertEquals(propertyId, jsonPath.getString("id"));
-        Assertions.assertEquals("Modern Apartment Downtown", jsonPath.getString("alias"));
-
-        response.prettyPeek();
-
-
-
-    }
-
-    @Test
-    public void testWithInvalidID(){
-
-        String propertyId = "844bf8ad-a434-4e9a-9a6e-f6cdc5a719ef";
+         id = id.substring(0, id.length()-2);
 
         Response response = given()
                 .spec(userRequestSpec)
-                .pathParam("id", propertyId)
+                .pathParam("id", id)
                 .when()
                 .get("/properties/{id}");
 

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.json.Json;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
 
@@ -31,7 +32,7 @@ public class ErrorHandlingTests extends TestBase{
         guest.setLastName("Doe");
         guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
         booking.setGuest(guest);
-        booking.setPropertyId("1567d5fe-c59c-4a9d-ac86-74473090534a");
+
 
         Response response = given()
                 .spec(userRequestSpec)

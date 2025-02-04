@@ -6,8 +6,11 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
 
@@ -18,8 +21,16 @@ public class BookingCreationTests extends TestBase{
 
 
 
-    @Test
-    public void bookingWithValidProperty(){
+    @ParameterizedTest
+    @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
+    public void bookingWithValidProperty(String id){
+
+       given().contentType(ContentType.JSON)
+               .spec(userRequestSpec)
+               .when()
+               .get("/bookings");
+
+
 
 
         Booking booking = new Booking();
@@ -33,7 +44,7 @@ public class BookingCreationTests extends TestBase{
         guest.setLastName("Doe");
         guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
         booking.setGuest(guest);
-        booking.setPropertyId("1567d5fe-c59c-4a9d-ac86-74473090534a");
+
 
         System.out.println("booking.toString() = " + booking.toString());
 
@@ -72,7 +83,7 @@ public class BookingCreationTests extends TestBase{
         guest.setLastName("Doe");
         guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
         booking.setGuest(guest);
-        booking.setPropertyId("1567d5fe-c59c-4a9d-ac86-74473090534a");
+
 
         System.out.println("booking.toString() = " + booking.toString());
 
@@ -173,7 +184,7 @@ public class BookingCreationTests extends TestBase{
         guest.setLastName("Doe");
         guest.setDateOfBirth(Arrays.asList(1990,1,1));
         booking.setGuest(guest);
-        booking.setPropertyId("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+
 
         return booking;
     }
