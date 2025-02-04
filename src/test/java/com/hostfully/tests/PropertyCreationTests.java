@@ -73,8 +73,8 @@ public class PropertyCreationTests extends TestBase {
                     .get("/properties").jsonPath().getObject("find{it.alias == '" + name + "'}", Property.class);
 
 
-            Booking.setPropertyId(String.valueOf(property1.getId()));
-            Booking.getPropertyId();
+            Booking.setListPropertyId(String.valueOf(property1.getId()));
+            Booking.getListPropertyId();
             System.out.println("property1.getCreatedAt().toString() = " + property1.getCreatedAt().toString());
 
             String createdAt = HostfullyUtil.parseDateString(property1.getCreatedAt().toString());

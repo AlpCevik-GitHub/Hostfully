@@ -26,14 +26,16 @@ public class Booking {
     private String status;
     @JsonProperty("guest")
     private Guest guest;
+    @JsonProperty("propertyId")
+    private String propertyId;
 
-    private static List<String> propertyId = new ArrayList<>();
+    private static List<String> listPropertyId = new ArrayList<>();
 
-    public static void getPropertyId() {
-        Booking.propertyId.forEach(System.out::println);
+    public static void getListPropertyId() {
+        Booking.listPropertyId.forEach(System.out::println);
     }
-    public static void setPropertyId(String propertyId) {
-        Booking.propertyId.add(propertyId);
+    public static void setListPropertyId(String propertyId) {
+        Booking.listPropertyId.add(propertyId);
     }
 
     // Nested Guest

@@ -11,11 +11,13 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
@@ -88,6 +90,20 @@ public class HostfullyUtil {
         );
 
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+    }
+
+    public static List<Integer> generateRandomStartDate() {
+        Random random = new Random();
+
+
+        LocalDate today = LocalDate.now();
+        LocalDate randomStartDate = today.plusDays(random.nextInt(30) + 1);
+
+        return Arrays.asList(
+                randomStartDate.getYear(),
+                randomStartDate.getMonthValue(),
+                randomStartDate.getDayOfMonth()
+        );
     }
 
 

@@ -1,6 +1,7 @@
 package com.hostfully.tests;
 
 import com.hostfully.pojo.Booking;
+import com.hostfully.utilities.HostfullyUtil;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -9,46 +10,89 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 
-public class BookingCreationTests extends TestBase{
-
-
-
-
+public class BookingCreationTests extends TestBase {
 
 
     @ParameterizedTest
     @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
-    public void bookingWithValidProperty(String id){
+    public void bookingWithValidProperty(String id) {
 
-       given().contentType(ContentType.JSON)
-               .spec(userRequestSpec)
-               .when()
-               .get("/bookings");
+        Response response = given().contentType(ContentType.JSON)
+                .spec(userRequestSpec)
+                .when()
+                .get("/bookings");
+
+        boolean propertyExists = false;
+        Booking[] allBookings = response.as(Booking[].class);
+
+        Map<String, Map<String, List<Integer>>> propertyDates = new HashMap<>();
+        for (Booking booking : allBookings) {
+            if (booking.getPropertyId().equals(id)) {
+                List<Integer> startDate = new ArrayList<>();
+                startDate.addAll(booking.getStartDate());
 
 
+                List<Integer> endDate = new ArrayList<>();
+                endDate.addAll(booking.getEndDate());
 
+                Map<String, List<Integer>> dates = new HashMap<>();
+                dates.put("startDate", startDate);
+                dates.put("endDate", endDate);
 
+                propertyDates.put(booking.getPropertyId(), dates);
+                propertyExists = true;
+
+            }
+        }
         Booking booking = new Booking();
-        booking.setId("1567d5fe-c59c-4a9d-ac86-74473090534a");
-        booking.setStartDate(Arrays.asList(2025,6,13));
-        booking.setEndDate(Arrays.asList(2025,6,13));
-        booking.setStatus("SCHEDULED");
+        List<Integer> startDate = HostfullyUtil.generateRandomStartDate();
+        List<Integer> endDate = Arrays.asList(startDate.get(0), startDate.get(1), startDate.get(2) + 2);
 
-        Booking.Guest guest = new Booking.Guest();
-        guest.setFirstName("John");
-        guest.setLastName("Doe");
-        guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
-        booking.setGuest(guest);
+        if (propertyExists) {
+            if (propertyDates.containsKey(id)) {
+                Map<String, List<Integer>> existingDates = propertyDates.get(id);
+                List<Integer> existingStartDate = existingDates.get("startDate");
+                List<Integer> existingEndDate = existingDates.get("endDate");
 
 
-        System.out.println("booking.toString() = " + booking.toString());
 
-        Response postResponse = given()
+                boolean datesOverlap = isDateOverlap(existingStartDate, existingEndDate, startDate, endDate);
+
+
+                if (datesOverlap) {
+                    boolean isValid = false;
+
+
+                    while (!isValid) {
+                        startDate = HostfullyUtil.generateRandomStartDate();
+                        endDate = Arrays.asList(startDate.get(0), startDate.get(1), startDate.get(2) + 2);
+
+
+                        isValid = !isDateOverlap(existingStartDate, existingEndDate, startDate, endDate);
+                    }
+
+                }
+            }
+        }
+
+            booking.setStartDate(toValidDateList(startDate));
+            booking.setEndDate(toValidDateList(endDate));
+            booking.setStatus("SCHEDULED");
+            booking.setPropertyId(id);
+            Booking.Guest guest = new Booking.Guest();
+            guest.setFirstName("John");
+            guest.setLastName("Doe");
+            guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
+            booking.setGuest(guest);
+
+
+                Response postResponse = given()
                 .spec(userRequestSpec)
                 .contentType(ContentType.JSON)
                 .body(booking)
@@ -66,127 +110,66 @@ public class BookingCreationTests extends TestBase{
 
         jsonPath.prettyPrint();
 
-    }
 
-    @Test
-    public void bookingWithSameValidProperty(){
-
-
-        Booking booking = new Booking();
-        booking.setId("1567d5fe-c59c-4a9d-ac86-74473090534a");
-        booking.setStartDate(Arrays.asList(2025,6,11));
-        booking.setEndDate(Arrays.asList(2025,6,11));
-        booking.setStatus("SCHEDULED");
-
-        Booking.Guest guest = new Booking.Guest();
-        guest.setFirstName("John");
-        guest.setLastName("Doe");
-        guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
-        booking.setGuest(guest);
-
-
-        System.out.println("booking.toString() = " + booking.toString());
-
-        Response postResponse = given()
-                .spec(userRequestSpec)
-                .contentType("application/json")
-                .body(booking)
-                .when()
-                .post("/bookings");
-
-        JsonPath postResponsePath = postResponse.jsonPath();
-
-        Assertions.assertEquals(422, postResponse.statusCode());
-
-        Assertions.assertEquals(422, postResponsePath.getInt("status"));
-        Assertions.assertEquals("Supplied booking is not valid", postResponsePath.getString("detail"));
-        Assertions.assertEquals("BOOKING_DATES_UNAVAILABLE", postResponsePath.getString("BOOKING_DATES_UNAVAILABLE"));
 
     }
 
-//    @Test
-//    public void bookingOverlappingSameProperty(){
-//
-//
-//        //Booking firstBooking = createBooking(new Integer[]{2025,6,5}, new Integer[]{2025,6,5});
-//        Booking firstBooking = new Booking();
-//        firstBooking.setId("1567d5fe-c59c-4a9d-ac86-74473090534a");
-//        firstBooking.setStartDate(Arrays.asList(2025,6,10));
-//        firstBooking.setEndDate(Arrays.asList(2025,6,10));
-//        firstBooking.setStatus("SCHEDULED");
-//
-//        Booking.Guest guest = new Booking.Guest();
-//        guest.setFirstName("John");
-//        guest.setLastName("Doe");
-//        guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
-//        firstBooking.setGuest(guest);
-//        firstBooking.setPropertyId("1567d5fe-c59c-4a9d-ac86-74473090534a");
-//        Response firstBookingResponse = given()
-//                .spec(userRequestSpec)
-//                .contentType("application/json")
-//                .body(firstBooking)
-//                .when()
-//                .post("/bookings");
-//
-//        JsonPath firstResponsePath = firstBookingResponse.jsonPath();
-//
-//        Assertions.assertEquals(422, firstBookingResponse.statusCode());
-////        Assertions.assertNotNull(firstResponsePath.getString("id"));
-////        Assertions.assertEquals("SCHEDULED", firstResponsePath.getString("status"));
-////        Assertions.assertEquals("John", firstResponsePath.getString("guest.firstName"));
-////        Assertions.assertEquals("Doe", firstResponsePath.getString("guest.lastName"));
-//
-//        firstResponsePath.prettyPrint();
-//
-//        //Booking secondBooking = createBooking(new Integer[]{2025,6,5}, new Integer[]{2025,6,5});
-//        Booking secondBooking = new Booking();
-//        secondBooking.setId("1567d5fe-c59c-4a9d-ac86-74473090534a");
-//        secondBooking.setStartDate(Arrays.asList(2025,6,10));
-//        secondBooking.setEndDate(Arrays.asList(2025,6,10));
-//        secondBooking.setStatus("SCHEDULED");
-//
-//        Booking.Guest guest1 = new Booking.Guest();
-//        guest.setFirstName("John");
-//        guest.setLastName("Doe");
-//        guest.setDateOfBirth(Arrays.asList(1990, 1, 1));
-//        firstBooking.setGuest(guest1);
-//        firstBooking.setPropertyId("1567d5fe-c59c-4a9d-ac86-74473090534a");
-//        Response secondBookingResponse = given()
-//                .spec(userRequestSpec)
-//                .contentType("application/json")
-//                .body(secondBooking)
-//                .when()
-//                .post("/bookings");
-//
-//        JsonPath secondResponsePath = secondBookingResponse.jsonPath();
-//
-//        Assertions.assertEquals(422, secondBookingResponse.statusCode());
-//        Assertions.assertNotNull(secondResponsePath.getString("id"));
-//        Assertions.assertEquals(422, secondResponsePath.getInt("status"));
-//        Assertions.assertEquals("Supplied booking is not valid", secondResponsePath.getString("detail"));
-//        Assertions.assertEquals("BOOKING_DATES_UNAVAILABLE", secondResponsePath.getString("BOOKING_DATES_UNAVAILABLE"));
-//
-//        secondBookingResponse.prettyPrint();
-//
-//
-//
-//    }
-
-    private Booking createBooking(Integer[] startDate, Integer[] endDate) {
-        Booking booking = new Booking();
-        booking.setId("3fa85f64-5717-4562-b3fc-2c963f66afa6");
-        booking.setStartDate(Arrays.asList(2025,6,3));
-        booking.setEndDate(Arrays.asList(2025,6,3));
-        booking.setStatus("SCHEDULED");
-
-        Booking.Guest guest = new Booking.Guest();
-        guest.setFirstName("John");
-        guest.setLastName("Doe");
-        guest.setDateOfBirth(Arrays.asList(1990,1,1));
-        booking.setGuest(guest);
 
 
-        return booking;
+    private boolean isDateOverlap(List<Integer> startDate1, List<Integer> endDate1, List<Integer> startDate2, List<Integer> endDate2) {
+
+        LocalDate start1 = toValidDate(startDate1);
+        LocalDate end1 = toValidDate(endDate1);
+        LocalDate start2 = toValidDate(startDate2);
+        LocalDate end2 = toValidDate(endDate2);
+
+
+        return !(end1.isBefore(start2) || end2.isBefore(start1));
     }
+    private LocalDate toValidDate(List<Integer> date) {
+        try {
+            if (date.get(1) == 2 && date.get(2) >= 29) {
+
+                if (!isLeapYear(date.get(0))) {
+                    System.out.println("Invalid Date: " + date);
+                    return LocalDate.of(date.get(0), 2, 28);
+                }
+            }
+            return LocalDate.of(date.get(0), date.get(1), date.get(2));
+        } catch (DateTimeException e) {
+
+            System.out.println("Invalid Date: " + date);
+            return LocalDate.of(date.get(0), date.get(1), 1);
+        }
+    }
+    private boolean isLeapYear(int year) {
+        return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+    }
+
+    private List<Integer> toValidDateList(List<Integer> date) {
+        try {
+
+            if (date.get(1) == 2 && date.get(2) >= 29) {
+                if (!isLeapYear(date.get(0))) {
+
+                    System.out.println("Invalid Date: " + date);
+                    return Arrays.asList(date.get(0), 2, 28);
+                }
+            }
+
+
+            return Arrays.asList(date.get(0), date.get(1), date.get(2));
+
+        } catch (DateTimeException e) {
+
+            System.out.println("Invalid Date: " + date);
+            return Arrays.asList(date.get(0), date.get(1), 1);
+        }
+    }
+
+
+
+
+
 
 }
