@@ -1,5 +1,29 @@
 # Hostfully
 ### **QA Technical Sheet**
+### **Brief Explanation For How To Run Tests**
+
+
+API tests start with the PropertyCreation Test Class. (Here, tests are ordered using the @Order annotation.) First, a specified number of random property aliases are generated, and property creation is performed. Then, the property creation ID, alias, and name from the response body are extracted and saved into the parameterizedCsvFile.csv file.
+
+Next, the Invalid Input Error Test and the Validation Error Test are executed using the data stored in the CSV file. In the PropertyCreation Test Class, the 3rd, 4th, and 5th tests proceed with static values.
+
+Secondly, the PropertyRetrievalTests Class is executed, and tests are performed using the values stored in the parameterizedCsvFile.csv file.
+
+Thirdly, the BookingCreationTests Class is executed. Here:
+
+    * First, a GET request retrieves all bookings.
+    * It checks if any of the propertyId values from the parameterizedCsvFile.csv file exist in the response.
+    * If they exist, their dates are checked, and a different date is selected for the new booking.
+    * Then, a POST request is sent to create the booking.
+Finally, the ErrorHandlingTests Class is executed to verify the error codes received.
+
+In all tests, response bodies are asserted. When the PropertyCreationTests class is run again, the data is refreshed.
+
+
+
+
+
+
 
 ## **Steps to Execute the Test**
 
