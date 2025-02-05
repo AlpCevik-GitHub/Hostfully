@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -97,13 +98,16 @@ public class HostfullyUtil {
 
 
         LocalDate today = LocalDate.now();
-        LocalDate randomStartDate = today.plusDays(random.nextInt(363) + 1);
+        int randomMonthOffset = random.nextInt(12) + 1;
+        LocalDate randomMonthDate = today.plusMonths(randomMonthOffset);
 
-        return Arrays.asList(
-                randomStartDate.getYear(),
-                randomStartDate.getMonthValue(),
-                randomStartDate.getDayOfMonth()
-        );
+        int year = randomMonthDate.getYear();
+        int month = randomMonthDate.getMonthValue();
+
+        int maxDayOfMonth = YearMonth.of(year, month).lengthOfMonth();
+        int day = random.nextInt(maxDayOfMonth) + 1;
+
+        return Arrays.asList(year, month, day);
     }
 
 
