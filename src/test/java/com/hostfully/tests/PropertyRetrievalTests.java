@@ -29,7 +29,7 @@ public class PropertyRetrievalTests extends TestBase{
                 .when()
                 .get("/properties/{id}");
 
-        Property property = response.as(Property.class);
+        Property property = response.as(Property.class); //De-Serialization
 
         Assertions.assertEquals(200, response.statusCode());
         Assertions.assertEquals(id, property.getId());
@@ -54,7 +54,9 @@ public class PropertyRetrievalTests extends TestBase{
                 .spec(userRequestSpec)
                 .pathParam("id", id)
                 .when()
-                .get("/properties/{id}");
+                .get("/properties/{id}")
+                .then()
+                .statusCode(204).extract().response();
 
         JsonPath jsonPath = response.jsonPath();
 

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PropertyCreationTests extends TestBase {
@@ -40,7 +41,7 @@ public class PropertyCreationTests extends TestBase {
     public void createPropertyWithValidInput(int value ) throws IOException {
 
         // Create parameterized test for creating property with valid input
-        HostfullyUtil.clearCSV();
+        HostfullyUtil.clearCSV(HostfullyUtil.path);
         for (int i = 0; i < value; i++) {
             String name = GenerateFakeParameter.generateName();
 
@@ -85,17 +86,7 @@ public class PropertyCreationTests extends TestBase {
         }
     }
 
-    @DisplayName("Create Property with Missing Fields")
-    @Test
-    @Order(5)
-    public void test() {
-        Response response = given()
-                .spec(userRequestSpec)
-                .when()
-                .get("/properties");
 
-        System.out.println("response.body().asString() = " + response.body().asString());
-    }
     @DisplayName("Create Property with Missing Fields")
     @ParameterizedTest
     @CsvFileSource(resources = "/parameterizedCsvFile.csv", numLinesToSkip = 1)
@@ -110,7 +101,12 @@ public class PropertyCreationTests extends TestBase {
                 .body(property+",")
                 .contentType(ContentType.JSON)
                 .when()
-                .post("/properties");
+                .post("/properties")
+                .then()
+                .statusCode(400)
+                .body("title", is("Bad Request"))
+                .body("detail", is("Failed to read request"))
+                .extract().response();
 
         JsonPath jsonPath = response.jsonPath();
         Assertions.assertEquals(400, response.statusCode());
@@ -139,7 +135,12 @@ public class PropertyCreationTests extends TestBase {
                 .body(property)
                 .contentType(ContentType.JSON)
                 .when()
-                .post("/properties");
+                .post("/properties")
+                .then()
+                .statusCode(400)
+                .body("title", is("Validation Error"))
+                .body("detail", is("Validation failed"))
+                .extract().response();
 
         JsonPath jsonPath = response.jsonPath();
         Assertions.assertEquals(400, response.statusCode());
@@ -152,12 +153,12 @@ public class PropertyCreationTests extends TestBase {
     }
     @DisplayName("Create Property with Internal Error")
     @Test
-    @Order(3)
+    @Order(4)
     public void checkPropertyWithInternalError() {
 
         Property property = new Property();
 
-        property.setAlias("Property for American");
+        property.setAlias("Property for American"); // using existing names in the response
 
 
         Response response = given()
@@ -177,7 +178,7 @@ public class PropertyCreationTests extends TestBase {
     }
     @DisplayName("Create Property with Unauthorized Access")
     @Test
-    @Order(4)
+    @Order(5)
     public void checkPropertyWithUnauthorizedAccess() {
 
         Property property = new Property();
@@ -190,7 +191,12 @@ public class PropertyCreationTests extends TestBase {
                 .body(property)
                 .contentType(ContentType.JSON)
                 .when()
-                .post("/properties");
+                .post("/properties")
+                .then()
+                .statusCode(401)
+                .body("error", is("Unauthorized"))
+                .body("message", is("Error while authenticating your access"))
+                .extract().response();
 
         JsonPath jsonPath = response.jsonPath();
         Assertions.assertEquals(401, response.statusCode());
@@ -201,6 +207,7 @@ public class PropertyCreationTests extends TestBase {
 
 
     }
+
 
 
 

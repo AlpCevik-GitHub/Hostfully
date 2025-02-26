@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class HostfullyUtil {
 
     public static String path = Paths.get(System.getProperty("user.dir"), "src", "test", "resources", "parameterizedCsvFile.csv").toString();
+    public static String pathID = Paths.get(System.getProperty("user.dir"), "src", "test", "resources", "parameterizedBookingIdCSVFile.csv").toString();
 
 
     public static void appendToCSV(String filePath, String id,String name,String date) throws IOException {
@@ -44,8 +46,25 @@ public class HostfullyUtil {
         }
     }
 
-    public static void clearCSV() throws IOException {
-        Files.write(Paths.get(path), new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+    public static void appendToCSVForID(String filePath, String id) throws IOException {
+
+        File file = new File(filePath);
+        boolean fileExists = file.exists();
+        boolean isEmpty = fileExists && Files.size(Paths.get(filePath)) == 0;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true))) {
+            if (!fileExists || isEmpty) {
+                bw.write("id");
+                bw.newLine();
+            }
+
+            bw.write(id);
+            bw.newLine();
+        }
+    }
+
+    public static void clearCSV(String filePath) throws IOException {
+        Files.write(Paths.get(filePath), new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
     }
 
 
@@ -59,6 +78,17 @@ public class HostfullyUtil {
                     .map(Integer::parseInt)
                     .toList();
             System.out.println("dateList.toString() = " + dateList.toString());
+
+            String str = "sasderkenar";
+            String result = "";
+
+            for (int i = str.length()-1; i >=0 ; i--) {
+
+                result += str.charAt(i);
+
+            }
+            System.out.println("result = " + result);
+
 
         }
 
@@ -110,7 +140,88 @@ public class HostfullyUtil {
         return Arrays.asList(year, month, day);
     }
 
+    public static boolean isDateOverlap(List<Integer> startDate1, List<Integer> endDate1, List<Integer> startDate2, List<Integer> endDate2) {
 
+        LocalDate start1 = toValidDate(startDate1);
+        LocalDate end1 = toValidDate(endDate1);
+        LocalDate start2 = toValidDate(startDate2);
+        LocalDate end2 = toValidDate(endDate2);
+
+
+        return !(end1.isBefore(start2) || end2.isBefore(start1));
+    }
+    private static LocalDate toValidDate(List<Integer> date) {
+        try {
+            if (date.get(1) == 2 && date.get(2) >= 29) {
+
+                if (!isLeapYear(date.get(0))) {
+                    System.out.println("Invalid Date: " + date);
+                    return LocalDate.of(date.get(0), 2, 28);
+                }
+            }
+            return LocalDate.of(date.get(0), date.get(1), date.get(2));
+        } catch (DateTimeException e) {
+
+            System.out.println("Invalid Date: " + date);
+            return LocalDate.of(date.get(0), date.get(1), 1);
+        }
+    }
+    private static boolean isLeapYear(int year) {
+        return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+    }
+
+    public static List<Integer> toValidDateList(List<Integer> date) {
+        try {
+            int year = date.get(0);
+            int month = date.get(1);
+            int day = date.get(2);
+
+
+            int maxDays = getMaxDaysInMonth(year, month);
+
+            if (date.get(1) == 2 && date.get(2) >= 29) {
+                if (!isLeapYear(date.get(0))) {
+
+                    System.out.println("Invalid Date: " + date);
+                    return Arrays.asList(date.get(0), 2, 28);
+                }
+            }
+            if (day <= maxDays) {
+                return Arrays.asList(year, month, day);
+            }
+
+            while (day > maxDays) {
+                day -= maxDays;
+                month++;
+
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+
+                maxDays = getMaxDaysInMonth(year, month);
+            }
+
+            return Arrays.asList(year, month, day);
+
+
+        } catch (DateTimeException e) {
+
+            System.out.println("Invalid Date: " + date);
+            return Arrays.asList(date.get(0), date.get(1), 1);
+        }
+    }
+
+    private static int getMaxDaysInMonth(int year, int month) {
+        switch (month) {
+            case 2:
+                return isLeapYear(year) ? 29 : 28;
+            case 4: case 6: case 9: case 11:
+                return 30;
+            default:
+                return 31;
+        }
+    }
 
 
 

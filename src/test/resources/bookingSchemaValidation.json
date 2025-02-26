@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "startDate": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "endDate": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SCHEDULED", "CANCELLED", "COMPLETED"]
+    },
+    "guest": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2147483647
+        },
+        "lastName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2147483647
+        },
+        "dateOfBirth": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": ["firstName", "lastName"]
+    },
+    "propertyId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  },
+  "required": ["startDate", "endDate", "propertyId"]
+}

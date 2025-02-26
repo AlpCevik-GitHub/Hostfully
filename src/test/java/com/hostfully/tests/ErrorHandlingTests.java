@@ -86,7 +86,7 @@ public class ErrorHandlingTests extends TestBase{
                 .accept(ContentType.JSON)
                 .auth().preemptive().basic("invalidName", "invalidPassword")
                 .when()
-                .get("/bookings");
+                .delete("/bookings");
 
         JsonPath jsonPath = response.jsonPath();
         Assertions.assertEquals(401, response.statusCode());
